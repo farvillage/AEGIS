@@ -35,13 +35,13 @@ To compile AEGIS into a standalone native application binary (.app / executable)
     bash 
     pip install customtkinter pandas scikit-learn scapy joblib pyinstaller
 
-3. Clean and compile using the spec file:
+2. Clean and compile using the spec file:
     ```
     bash
     rm -rf dist build
     pyinstaller aegis.spec --clean
 
-5. Locate your binary:
+3. Locate your binary:
     The finished standalone application bundle will be located inside the dist/ folder.
 
 ## Author

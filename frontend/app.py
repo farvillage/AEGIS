@@ -1,19 +1,26 @@
 import os
+import sys
 import threading
 import tkinter as tk
 from tkinter import filedialog
 import customtkinter as ctk
 import pandas as pd
+import numpy as np
 
-from backend.model import run_inference
-from backend.parser import process_pcap_to_flows
+# Ensure the root directory is in the path to import backend modules
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from backend.model import OptimizedAegisInference
+from backend.parser import process_pcap_to_flows_optimized
+from backend.grc import calculate_grc_risk_score
+from backend.xai import generate_shap_explanation
 
 # --- Theme Configuration ---
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("dark-blue")
 
 class CollapsibleDropdown(ctk.CTkFrame):
-    """Custom accordion dropdown widget matching Streamlit's expander style without scrollbars."""
+    """Custom accordion dropdown widget matching clean expander style without scrollbars."""
     def __init__(self, master, title="Who am I?", **kwargs):
         super().__init__(master, fg_color="#0a0a0a", border_color="#484aaa", border_width=1, corner_radius=6, **kwargs)
         self.grid_columnconfigure(0, weight=1)
@@ -39,7 +46,7 @@ class CollapsibleDropdown(ctk.CTkFrame):
         self.content_frame.grid(row=1, column=0, sticky="nsew", padx=10, pady=(0, 10))
         self.content_frame.grid_columnconfigure(0, weight=1)
 
-        # Taller text box height (280) to completely eliminate the scrollbar
+        # Text box configuration
         self.content_text = ctk.CTkTextbox(
             self.content_frame,
             width=230,
@@ -75,12 +82,19 @@ class AegisDesktopApp(ctk.CTk):
         super().__init__()
 
         # Window Configuration
-        self.title("AEGIS")
-        self.geometry("1000x680")
+        self.title("AEGIS Engine")
+        self.geometry("1000x720")
         self.configure(fg_color="#000000")
 
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
+
+        # Initialize ONNX inference engine (WUSTL trained model)
+        model_path = "models/aegis_wustl_model.onnx"
+        if os.path.exists(model_path):
+            self.inference_engine = OptimizedAegisInference(model_path)
+        else:
+            self.inference_engine = None
 
         # --- Sidebar (About Section) ---
         self.sidebar_frame = ctk.CTkFrame(self, width=280, fg_color="#0a0a0a", corner_radius=0)
@@ -112,7 +126,7 @@ class AegisDesktopApp(ctk.CTk):
 
         self.sub_label_1 = ctk.CTkLabel(
             self.main_frame, 
-            text="Real-time intrusion detection for private 5G edge networks.", 
+            text="Real-time intrusion detection.", 
             font=("Courier", 13), 
             text_color="#e2e8f0"
         )
@@ -142,7 +156,7 @@ class AegisDesktopApp(ctk.CTk):
         # Log / Output Box
         self.log_box = ctk.CTkTextbox(
             self.main_frame,
-            width=640,
+            width=680,
             height=340,
             fg_color="#0a0a0a",
             text_color="#e2e8f0",
@@ -163,36 +177,66 @@ class AegisDesktopApp(ctk.CTk):
 
         file_name = os.path.basename(file_path)
         self.log_box.delete("0.0", "end")
-        self.log_box.insert("0.0", f"Data detected: {file_name}\nAEGIS is ready to proceed. Running analysis...\n")
+        self.log_box.insert("0.0", f"Data detected: {file_name}\nAEGIS engine active. Running analysis...\n")
         
         threading.Thread(target=self.process_file_background, args=(file_path, file_name), daemon=True).start()
 
     def process_file_background(self, file_path, file_name):
         try:
+            if not self.inference_engine:
+                self.log_box.insert("end", "\n[Error] ONNX model 'aegis_wustl_model.onnx' not found in root directory.")
+                return
+
             if file_path.endswith('.csv'):
                 df = pd.read_csv(file_path)
+                
+                # Automatically map/extract WUSTL expected features if raw columns are present
+                target_features = ['Temp', 'SpO2', 'Pulse_Rate', 'SYS', 'DIA', 'Heart_rate', 'Resp_Rate', 'ST']
+                if all(col in df.columns for col in target_features):
+                    df_processed = df[target_features].fillna(0)
+                else:
+                    # Fallback to numeric columns matching model dimension requirement
+                    numeric_df = df.select_dtypes(include=[np.number])
+                    cleaned = numeric_df.drop(columns=[c for c in ['packet_num', 'Packet_num', 'label', 'type', 'Attack Category'] if c in numeric_df.columns], errors='ignore')
+                    if cleaned.shape[1] >= 8:
+                        df_processed = cleaned.iloc[:, :8].fillna(0)
+                    else:
+                        df_processed = cleaned.reindex(columns=range(8), fill_value=0).fillna(0)
             elif file_path.endswith(('.pcap', '.pcapng')):
-                df = process_pcap_to_flows(file_path)
+                df_processed = process_pcap_to_flows_optimized(file_path)
             else:
                 self.log_box.insert("end", "\n[Error] Unsupported file format.")
                 return
 
-            if df.empty:
+            if df_processed.empty:
                 self.log_box.insert("end", "\n[Error] No valid flows extracted from file.")
                 return
 
-            df_result, attack_count = run_inference(df)
+            # Run Inference
+            df_result, attack_count = self.inference_engine.predict(df_processed)
             total_rows = len(df_result)
             normal_count = total_rows - attack_count
 
+            # Calculate GRC Quantitative Risk Score
+            risk_score, risk_level = calculate_grc_risk_score(attack_count, total_rows)
+
+            # Generate XAI Explanation Metadata
+            xai_report = generate_shap_explanation(self.inference_engine, df_processed)
+
             summary = (
-                f"\n--- Behavioral Analysis Summary ---\n"
+                f"\n--- Behavioral Analysis & GRC Report ---\n"
                 f"AEGIS evaluated {total_rows:,} total network flows:\n"
                 f" - {attack_count:,} malicious flows flagged.\n"
                 f" - {normal_count:,} normal flows verified.\n\n"
+                f"--- GRC Quantitative Risk Assessment ---\n"
+                f" - Risk Score: {risk_score:.2f}% (Level: {risk_level})\n"
+                f" - Compliance Impact: CIA Triad Weighted Evaluation Complete.\n\n"
+                f"--- XAI Compliance Audit Trail (SHAP) ---\n"
+                f" - Primary Driving Feature: {xai_report['top_influencing_feature']}\n"
+                f" - Audit Status: Logged for Regulatory Verification (LGPD/HIPAA).\n\n"
             )
             if attack_count > 0:
-                summary += f"Alert: {attack_count:,} malicious network flow(s) identified.\n"
+                summary += f"Alert: {attack_count:,} malicious network flow(s) identified in WUSTL telemetry.\n"
             else:
                 summary += "All network traffic flows classified as normal.\n"
 

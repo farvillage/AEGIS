@@ -1,0 +1,6 @@
+packet_size,protocol_type,is_mqtt,is_coap,src_port,dst_port,feature_7,feature_8
+120,6,1,0,1883,443,0,1
+540,17,0,1,5683,80,1,1
+64,6,0,0,80,1883,0,0
+1024,6,1,0,443,80,1,0
+256,17,0,1,5683,443,0,1

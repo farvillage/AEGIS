@@ -1,7 +1,7 @@
 [project]
 name = "aegis"
 version = "0.1.0"
-description = "Real-time intrusion detection for private 5G edge networks"
+description = "Real-time intrusion detection for IoMT Environments."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

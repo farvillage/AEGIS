@@ -60,7 +60,7 @@ class CollapsibleDropdown(ctk.CTkFrame):
         self.content_text.insert("0.0", 
             "Ygor Gesteira\n"
             "Master's Researcher @ Instituto Federal da Paraíba (IFPB)\n\n"
-            "Currently developing AEGIS as part of my Master's research, focusing on machine learning applications for cybersecurity in Internet of Medical Things (IoMT) over private 5G networks.\n\n"
+            "Currently developing AEGIS as part of my Master's research, focusing on machine learning applications for cybersecurity in Internet of Medical Things (IoMT).\n\n"
             "\"With great power comes great responsibility\" - Stan Lee\n\n"
             "ygorgesteira@gmail.com"
         )
@@ -89,8 +89,8 @@ class AegisDesktopApp(ctk.CTk):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # Initialize ONNX inference engine (WUSTL trained model)
-        model_path = "models/aegis_wustl_model.onnx"
+        # Initialize ONNX inference engine (CICIoMT trained model)
+        model_path = "models/aegis_ciciomt_model.onnx"
         if os.path.exists(model_path):
             self.inference_engine = OptimizedAegisInference(model_path)
         else:
@@ -184,7 +184,7 @@ class AegisDesktopApp(ctk.CTk):
     def process_file_background(self, file_path, file_name):
         try:
             if not self.inference_engine:
-                self.log_box.insert("end", "\n[Error] ONNX model 'aegis_wustl_model.onnx' not found in root directory.")
+                self.log_box.insert("end", "\n[Error] ONNX model 'aegis_ciciomt_model.onnx' not found in models directory.")
                 return
 
             if file_path.endswith('.csv'):
@@ -236,7 +236,7 @@ class AegisDesktopApp(ctk.CTk):
                 f" - Audit Status: Logged for Regulatory Verification (LGPD/HIPAA).\n\n"
             )
             if attack_count > 0:
-                summary += f"Alert: {attack_count:,} malicious network flow(s) identified in WUSTL telemetry.\n"
+                summary += f"Alert: {attack_count:,} malicious network flow(s) identified in CICIoMT telemetry.\n" # Updated from WUSTL
             else:
                 summary += "All network traffic flows classified as normal.\n"
 

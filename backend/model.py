@@ -6,15 +6,14 @@ from skl2onnx.common.data_types import FloatTensorType
 def optimize_and_export_model(sklearn_model, num_features):
     # Define input tensor type for the ONNX graph based on feature dimensions
     initial_type = [('float_input', FloatTensorType([None, num_features]))]
-    
-    # Convert scikit-learn model to ONNX using skl2onnx
     model_onnx = convert_sklearn(sklearn_model, initial_types=initial_type)
     
-    with open("aegis_wustl_model.onnx", "wb") as f:
+    # Convert scikit-learn model to ONNX using skl2onnx
+    with open("models/aegis_ciciomt_model.onnx", "wb") as f:
         f.write(model_onnx.SerializeToString())
 
 class OptimizedAegisInference:
-    def __init__(self, model_path="aegis_wustl_model.onnx"):
+    def __init__(self, model_path="models/aegis_ciciomt_model.onnx"):  # Updated here
         # Configure ONNX Runtime for low-latency edge inference
         opts = ort.SessionOptions()
         opts.intra_op_num_threads = 2

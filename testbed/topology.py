@@ -1,6 +1,7 @@
 import time
 import os
 import sys
+import argparse
 import pandas as pd
 
 # Ensure the root directory is in the path to import backend modules
@@ -11,15 +12,15 @@ from backend.benchmark import AegisBenchmarkCollector
 from backend.model import OptimizedAegisInference
 
 def run_local_iomt_simulation(data_path):
-    print(f"[*] Initializing AEGIS Local Simulation (5G Edge / IoMT)")
+    print(f"[*] Initializing AEGIS Local Simulation (IoMT - CICIoMT2024)")
     print(f"[*] Target analysis file: {data_path}")
     
     benchmark = AegisBenchmarkCollector()
     
     # Check if optimized ONNX model exists
-    model_path = "aegis_wustl_model.onnx"
+    model_path = "models/aegis_ciciomt_model.onnx"
     if not os.path.exists(model_path):
-        print(f"[!] Warning: '{model_path}' not found. Ensure the model is exported or path is correct.")
+        print(f"[!] Warning: '{model_path}' not found. Ensure the model is exported.")
         return
 
     inference_engine = OptimizedAegisInference(model_path)
@@ -58,8 +59,17 @@ def run_local_iomt_simulation(data_path):
         print(f" - {key}: {value}")
 
 if __name__ == "__main__":
-    sample_data = "aegis_dataset_sample.csv"
-    
+    # Configuração de argumentos de linha de comando flexíveis
+    parser = argparse.ArgumentParser(description="Run AEGIS evaluation pipeline")
+    parser.add_argument(
+        "--data", 
+        type=str, 
+        default="/Users/farvillage/Downloads/ciciomt2024.csv", 
+        help="Path to the CICIoMT2024 dataset CSV file"
+    )
+    args = parser.parse_args()
+    sample_data = args.data
+
     if not os.path.exists(sample_data):
         print(f"[!] Dataset file '{sample_data}' not found.")
         print("[*] Creating a sample CSV file with 8 features for immediate testing...")

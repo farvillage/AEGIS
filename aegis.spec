@@ -11,7 +11,7 @@ a = Analysis(
     pathex=[],
     binaries=sklearn_binaries + scapy_binaries,
     datas=[
-        ('aegis_wustl_model.pkl', '.'),
+        ('models/aegis_ciciomt_model.onnx', 'models'),  # Updated to ciciomt model
         ('aegisicon.png', '.'),
         ('backend', 'backend'),
     ] + sklearn_datas + scapy_datas,

@@ -177,7 +177,7 @@ class AegisDesktopApp(ctk.CTk):
 
         file_name = os.path.basename(file_path)
         self.log_box.delete("0.0", "end")
-        self.log_box.insert("0.0", f"Data detected: {file_name}\nAEGIS engine active. Running analysis...\n")
+        self.log_box.insert("0.0", f"Data detected: {file_name}\nAEGIS Engine active. Running analysis...\n")
         
         threading.Thread(target=self.process_file_background, args=(file_path, file_name), daemon=True).start()
 

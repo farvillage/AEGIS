@@ -25,8 +25,12 @@ class OptimizedAegisInference:
         self.output_name = self.session.get_outputs()[0].name
 
     def predict(self, features_df):
+        # Extract the first 8 numeric columns by position, avoiding name mismatches entirely
+        numeric_df = features_df.select_dtypes(include=[np.number])
+        inference_df = numeric_df.iloc[:, :8].fillna(0)
+        
         # Format input data for the ONNX runtime session
-        input_data = features_df.select_dtypes(include=[np.number]).fillna(0).to_numpy(dtype=np.float32)
+        input_data = inference_df.to_numpy(dtype=np.float32)
         
         # Run sub-millisecond edge inference
         outputs = self.session.run([self.output_name], {self.input_name: input_data})

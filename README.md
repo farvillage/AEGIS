@@ -1,72 +1,117 @@
 # AEGIS
 
-**AEGIS** is a standalone native desktop application and research prototype for real-time network intrusion detection, quantitative GRC risk analysis, and explainable AI auditing in Internet of Medical Things (IoMT) environments.
+**An explainable AI-powered network intrusion detection and quantitative GRC analysis platform for Internet of Medical Things (IoMT) environments.**
 
-## Overview
+`AEGIS` is a standalone native desktop application and cybersecurity research prototype designed for network intrusion detection, quantitative risk assessment, and explainable AI auditing in IoMT environments. It analyzes raw network traffic captures (`.pcap`, `.pcapng`) and structured telemetry datasets (`.csv`), performs machine learning inference through ONNX Runtime, and translates detection results into measurable security risks using the Confidentiality, Integrity, and Availability (CIA) triad.
 
-AEGIS Desktop is designed as a native, zero-browser security analysis platform for macOS and Windows.
+AEGIS integrates network traffic analysis, machine learning, Governance, Risk, and Compliance (GRC), and Explainable Artificial Intelligence (XAI) into a single desktop application. It runs natively on macOS and Windows, without requiring a browser or local web server.
 
-The application uses **CustomTkinter** for its desktop interface and **ONNX Runtime** for direct, in-memory machine learning inference. By removing the need for a local web server or browser-based interface, AEGIS provides a lightweight execution environment suitable for security analysis and research.
+## Why
 
-Beyond intrusion detection, the platform extends the traditional classification workflow with **quantitative governance, risk, and compliance (GRC) analysis** and **explainable artificial intelligence (XAI)**. Detection results can be translated into measurable risk using the **CIA triad** while TreeSHAP-based feature attribution provides an interpretable audit trail for individual predictions.
+Traditional intrusion detection systems primarily focus on classifying network activity as benign or malicious. However, identifying a threat is only part of the security analysis process, particularly in critical environments such as the Internet of Medical Things.
 
-The project is intended as a research prototype for cybersecurity applications involving **IoMT infrastructures**, particularly environments where security incidents can have significant implications for confidentiality, integrity, and availability.
+A suspicious network flow can have different implications depending on the affected infrastructure, the sensitivity of the transmitted information, and the potential impact on system availability or integrity.
+
+`AEGIS` explores a broader approach by connecting three complementary security dimensions:
+
+- **Detection:** Identifies potentially malicious network activity through machine learning and network traffic analysis.
+- **Risk Assessment:** Converts detection results into quantitative risk measurements using GRC methodologies and the CIA triad.
+- **Explainability:** Uses TreeSHAP to identify the features contributing to individual model predictions, providing an interpretable audit trail.
+
+The objective is to move beyond conventional threat classification and provide a more transparent, risk-oriented security analysis workflow for IoMT infrastructures.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A[Network Input] --> B{Input Format}
+
+    B -->|PCAP / PCAPNG| C[Scapy Packet Parser]
+    B -->|CSV| D[Pandas Dataset Loader]
+
+    C --> E[Network Flow Aggregation]
+    E --> F[Feature Mapping]
+
+    D --> F
+
+    F --> G[ONNX Runtime]
+    H[Pretrained ONNX Model] --> G
+
+    G --> I[Intrusion Detection Results]
+
+    I --> J[Quantitative GRC Engine]
+    I --> K[TreeSHAP XAI Engine]
+
+    J --> L[CIA Triad Risk Assessment]
+    K --> M[Feature Attribution]
+    K --> N[Explainability Audit]
+
+    L --> O[AEGIS Desktop Interface]
+    M --> O
+    N --> O
+    I --> O
+
+    O --> P[Security Analysis Report]
+```
 
 ## Key Features
 
 ### Native Desktop Architecture
 
-* Runs as a standalone desktop application on the operating system.
-* Does not require a web browser.
-* Does not require a local web server or background application ports.
-* Uses CustomTkinter for native window rendering.
+- Standalone desktop application for macOS and Windows.
+- No browser or local web server required.
+- No background application ports or web-based dependencies.
+- CustomTkinter interface with native window rendering.
+- Direct in-memory machine learning inference through ONNX Runtime.
 
 ### Network Intrusion Detection
 
-* Supports raw network traffic captures in `.pcap` and `.pcapng` formats.
-* Supports structured telemetry datasets in `.csv` format.
-* Uses Scapy for packet parsing and network flow aggregation.
-* Performs machine learning inference directly in memory through ONNX Runtime.
-* Uses an optimized ONNX classification model for efficient execution.
+- Supports raw packet captures in `.pcap` and `.pcapng` formats.
+- Supports structured network telemetry datasets in `.csv` format.
+- Scapy-based packet parsing and network flow aggregation.
+- Feature mapping and alignment for machine learning inference.
+- Optimized ONNX classification model for CPU-based execution.
 
 ### Quantitative GRC Risk Analysis
 
-* Converts intrusion detection results into measurable security risk scores.
-* Evaluates potential impact across the **Confidentiality, Integrity, and Availability (CIA)** triad.
-* Provides a quantitative perspective on detected threats rather than relying solely on classification labels.
-* Designed with critical medical and IoMT infrastructure in mind.
+- Converts intrusion detection results into quantitative security risk scores.
+- Evaluates potential impacts across the Confidentiality, Integrity, and Availability (CIA) triad.
+- Provides a risk-oriented perspective beyond conventional threat classification.
+- Designed for security analysis in critical medical and IoMT infrastructures.
 
 ### Explainable AI and Compliance Auditing
 
-* Uses **TreeSHAP** to identify the features contributing to individual model predictions.
-* Provides local feature attribution for greater model transparency.
-* Generates audit information that can be used to analyze and document security decisions.
-* Supports research into explainable cybersecurity systems and regulatory compliance contexts such as **LGPD** and **HIPAA**.
+- Uses TreeSHAP to explain individual machine learning predictions.
+- Identifies the features contributing to model classification decisions.
+- Generates local feature attribution information for security auditing.
+- Integrates explainability with quantitative risk analysis.
+- Supports research into transparent cybersecurity systems and compliance-oriented auditing, including regulatory contexts such as LGPD and HIPAA.
 
 ### Security Operations Interface
 
-* Provides a piano-black operator interface designed for security operations workflows.
-* Uses a minimal dark visual language to prioritize telemetry and threat information.
-* Includes an integrated researcher profile accordion.
-* Designed to keep detection, risk analysis, and explainability within a single interface.
+- Piano-black operator interface designed for security analysis workflows.
+- Minimal dark visual language focused on telemetry and threat information.
+- Integrated detection, GRC, and explainability views.
+- Researcher profile accordion integrated into the application.
+- Centralized interface for network analysis and security reporting.
 
 ## Technology Stack
 
-| Component                | Technology      |
-| ------------------------ | --------------- |
-| Desktop UI               | CustomTkinter   |
-| Machine Learning Runtime | ONNX Runtime    |
-| Machine Learning         | Scikit-learn    |
-| Explainable AI           | TreeSHAP / SHAP |
-| Network Processing       | Scapy           |
-| Data Processing          | Pandas          |
-| Model Format             | ONNX            |
-| Application Packaging    | PyInstaller     |
-| Development Language     | Python          |
+| Component | Technology |
+|-----------|------------|
+| Desktop UI | CustomTkinter |
+| Programming Language | Python |
+| Machine Learning Runtime | ONNX Runtime |
+| Machine Learning | Scikit-learn |
+| Explainable AI | TreeSHAP / SHAP |
+| Network Processing | Scapy |
+| Data Processing | Pandas |
+| Model Format | ONNX |
+| Application Packaging | PyInstaller |
+| Project Configuration | uv / pyproject.toml |
 
 ## Project Structure
 
-## Project Structure
 ```text
 AEGIS/
 ├── assets/
@@ -74,15 +119,15 @@ AEGIS/
 │   └── aegisicon.png
 ├── backend/
 │   ├── benchmark.py
-│   ├── grc.py (Quantitative GRC risk and CIA triad scoring)
+│   ├── grc.py
 │   ├── main.py
-│   ├── model.py (ONNX Runtime feature mapping and inference logic)
-│   ├── parser.py (Scapy packet parser and flow aggregator)
-│   └── xai.py (TreeSHAP local feature attribution and audit generation)
+│   ├── model.py
+│   ├── parser.py
+│   └── xai.py
 ├── data/
 │   └── aegis_dataset_sample.csv
 ├── frontend/
-│   └── app.py (CustomTkinter native desktop UI controller)
+│   └── app.py
 ├── models/
 │   └── aegis_ciciomt_model.onnx
 ├── testbed/
@@ -96,45 +141,47 @@ AEGIS/
 
 ### Backend
 
-* `benchmark.py` — Model benchmarking and evaluation utilities.
-* `grc.py` — Quantitative GRC risk calculation and CIA triad scoring.
-* `main.py` — Core application and backend logic.
-* `model.py` — Feature mapping and machine learning inference logic using ONNX Runtime.
-* `parser.py` — Scapy-based packet parsing and network flow aggregation.
-* `xai.py` — TreeSHAP feature attribution and explainability audit generation.
+- `benchmark.py` — Model benchmarking and evaluation utilities.
+- `grc.py` — Quantitative GRC risk calculation and CIA triad scoring.
+- `main.py` — Core application backend and analysis orchestration.
+- `model.py` — Feature mapping and machine learning inference pipeline using ONNX Runtime.
+- `parser.py` — Scapy-based packet parsing and network flow aggregation.
+- `xai.py` — TreeSHAP feature attribution and explainability audit generation.
 
 ### Frontend
 
-* `app.py` — CustomTkinter native desktop interface and application controller.
+- `app.py` — CustomTkinter native desktop interface and application controller.
 
 ### Data
 
-* `aegis_dataset_sample.csv` — Sample network telemetry dataset used for testing and analysis.
+- `aegis_dataset_sample.csv` — Sample network telemetry dataset for testing and analysis.
 
 ### Models
 
-* `aegis_ciciomt_model.onnx` — Optimized ONNX classification model used for inference.
+- `aegis_ciciomt_model.onnx` — Optimized ONNX classification model used for machine learning inference.
 
 ### Assets
 
-* `aegisicon.png` — Source branding asset.
-* `aegisicon.icns` — Native macOS application dock icon.
+- `aegisicon.png` — Source branding asset.
+- `aegisicon.icns` — Native macOS application icon.
 
 ### Testbed
 
-* `topology.py` — Network testbed topology configuration and experimentation setup.
+- `topology.py` — Network testbed topology configuration and experimentation utilities.
 
 ### Project Configuration
 
-* `aegis.spec` — PyInstaller multi-module build configuration.
-* `pyproject.toml` — Python project and dependency configuration.
-* `uv.lock` — Locked dependency versions for reproducible environments.
+- `aegis.spec` — PyInstaller application packaging configuration.
+- `pyproject.toml` — Python project metadata and dependency configuration.
+- `uv.lock` — Locked dependency versions for reproducible environments.
 
 ## Running from Source
 
 ### 1. Install Dependencies
 
-Install the required Python packages:
+AEGIS uses Python and the dependencies defined in its project configuration.
+
+Using pip:
 
 ```bash
 pip install customtkinter pandas scikit-learn onnxruntime shap scapy pyinstaller
@@ -142,17 +189,17 @@ pip install customtkinter pandas scikit-learn onnxruntime shap scapy pyinstaller
 
 ### 2. Run the Application
 
-Start the AEGIS desktop interface:
+Start the native desktop interface:
 
 ```bash
 python3 frontend/app.py
 ```
 
-The application should open as a native desktop window.
+The application should open as a standalone desktop window.
 
 ## Building the Application
 
-AEGIS uses **PyInstaller** to package the application into a standalone executable.
+AEGIS uses PyInstaller to package the application into a standalone executable.
 
 ### 1. Clean Previous Builds
 
@@ -168,32 +215,42 @@ pyinstaller aegis.spec --clean
 
 ### 3. Locate the Application
 
-The generated standalone application will be available inside the:
+The generated application will be available inside:
 
 ```text
 dist/
 ```
 
-directory.
-
-On macOS, the result is packaged as a native `.app` application. On Windows, PyInstaller generates the corresponding executable package.
+On macOS, the output is packaged as a native `.app` application. On Windows, PyInstaller generates the corresponding executable distribution.
 
 ## Research Context
 
-AEGIS is part of research into the application of machine learning and explainable artificial intelligence to cybersecurity in **Internet of Medical Things (IoMT)** environments.
+AEGIS is part of ongoing research into machine learning applications for cybersecurity in Internet of Medical Things (IoMT) environments.
 
-The project explores the combination of:
+The project explores the integration of:
 
-* Network intrusion detection
-* Machine learning inference
-* Network traffic analysis
-* Quantitative cybersecurity risk assessment
-* CIA triad-based impact analysis
-* Explainable AI
-* Compliance-oriented audit trails
-* IoMT
+- Network intrusion detection systems (NIDS).
+- Machine learning-based threat classification.
+- Network traffic analysis and feature extraction.
+- Quantitative Governance, Risk, and Compliance (GRC).
+- Confidentiality, Integrity, and Availability (CIA) impact assessment.
+- Explainable Artificial Intelligence (XAI).
+- TreeSHAP-based feature attribution.
+- Compliance-oriented security auditing.
+- IoMT infrastructure protection.
 
-The objective is to move beyond simple threat classification by connecting **detection, risk quantification, and model explainability** within a single security analysis workflow.
+The research objective is to establish a unified security analysis workflow connecting **threat detection, quantitative risk assessment, and explainable machine learning**.
+
+Rather than treating intrusion detection as an isolated classification task, AEGIS explores how machine learning predictions can be translated into interpretable security information and measurable risk indicators.
+
+## Limitations
+
+- Model predictions depend on the quality and feature compatibility of the input datasets.
+- The classification model is limited to the traffic patterns and classes represented in its training data.
+- Quantitative GRC scores are analytical indicators and should not be interpreted as definitive measurements of real-world organizational risk.
+- SHAP explanations describe model behavior and feature contributions; they do not establish causality.
+- The application is a research prototype and has not been established as a certified medical-device security solution.
+- Detection results should complement, rather than replace, professional security assessments and incident response procedures.
 
 ## Author
 
@@ -201,4 +258,8 @@ The objective is to move beyond simple threat classification by connecting **det
 
 Master's Researcher at **Instituto Federal da Paraíba (IFPB)**
 
-Research focus: machine learning applications for cybersecurity in Internet of Medical Things (IoMT) environments.
+Research focus: Machine learning, Explainable Artificial Intelligence, quantitative cybersecurity risk assessment, and intrusion detection in Internet of Medical Things (IoMT) environments.
+
+## License
+
+MIT

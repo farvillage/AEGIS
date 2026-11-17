@@ -259,7 +259,3 @@ Rather than treating intrusion detection as an isolated classification task, AEG
 Master's Researcher at **Instituto Federal da Paraíba (IFPB)**
 
 Research focus: Machine learning, Explainable Artificial Intelligence, quantitative cybersecurity risk assessment, and intrusion detection in Internet of Medical Things (IoMT) environments.
-
-## License
-
-MIT

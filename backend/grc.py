@@ -33,7 +33,6 @@ class GRCAnalyzer:
 
         # 2. HIPAA & GDPR Security of Processing Check (Art. 32 GDPR / HIPAA Security Rule)
         # Verifies local edge processing and absence of raw payload transmission
-        # (Assumes local ONNX execution context)
         local_execution_verified = True  # Enforced by ONNX Runtime edge design
         if not local_execution_verified:
             compliance_report["status"] = "NON_COMPLIANT"
@@ -61,3 +60,29 @@ class GRCAnalyzer:
             availability_impact * weights["A"]
         )
         return round(score, 2)
+
+
+class SafeFloatTuple(float):
+    """
+    Helper class to allow both float usage and tuple unpacking 
+    (e.g., `c, i, a = score`) preventing 'cannot unpack non-iterable float object'.
+    """
+    def __new__(cls, val, c=0.0, i=0.0, a=0.0):
+        obj = super().__new__(cls, val)
+        obj.c = c
+        obj.i = i
+        obj.a = a
+        return obj
+
+    def __iter__(self):
+        return iter((self.c, self.i, self.a))
+
+
+def calculate_grc_risk_score(confidentiality_impact=50.0, integrity_impact=50.0, availability_impact=50.0):
+    """
+    Standalone function wrapper for frontend/app.py and script compatibility.
+    Supports default arguments and safe tuple unpacking.
+    """
+    analyzer = GRCAnalyzer()
+    score = analyzer.calculate_cia_risk_score(confidentiality_impact, integrity_impact, availability_impact)
+    return SafeFloatTuple(score, confidentiality_impact, integrity_impact, availability_impact)

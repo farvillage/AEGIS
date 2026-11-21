@@ -19,8 +19,8 @@ class OptimizedAegisEnsembleInference:
     powered by ONNX Runtime for ultra-low latency edge/MEC environments.
     """
     def __init__(self, rf_model_path="models/aegis_ciciomt_model.onnx", 
-                 xgb_model_path="models/aegis_ciciomt_xgboost.onnx",
-                 weight_rf=0.5, weight_xgb=0.5):
+            xgb_model_path="models/aegis_ciciomt_xgboost.onnx",
+            weight_rf=0.5, weight_xgb=0.5):
         
         # Store ensemble weights (must sum to 1.0)
         self.weight_rf = weight_rf
